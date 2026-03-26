@@ -1,7 +1,13 @@
 from pathlib import Path
+import sys
 from uuid import uuid4
 
 import streamlit as st
+
+# Ensure package imports work both locally and on Streamlit Cloud.
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 from config.config import IMAGE_DIR
 from database.db import (
