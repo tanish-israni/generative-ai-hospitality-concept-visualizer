@@ -1,12 +1,17 @@
 import os
 
 import requests
+import streamlit as st
 
 from config.config import HF_API_URL
 
 
+def _get_huggingface_api_key() -> str | None:
+    return os.getenv("HUGGINGFACE_API_KEY") or st.secrets.get("HUGGINGFACE_API_KEY")
+
+
 def generate_image(prompt: str) -> bytes:
-    api_key = os.getenv("HUGGINGFACE_API_KEY")
+    api_key = _get_huggingface_api_key()
     if not api_key:
         raise ValueError("Missing HUGGINGFACE_API_KEY.")
 

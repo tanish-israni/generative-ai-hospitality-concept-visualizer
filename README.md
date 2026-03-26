@@ -1,30 +1,39 @@
-# Hospitality Concept Visualizer
+# Multimodal Hospitality Creator
 
-Hospitality Concept Visualizer is a multimodal Generative AI application that transforms a single hospitality prompt into two outputs:
+Multimodal Hospitality Creator is a Streamlit-based Generative AI application for hospitality concept creation. It transforms a single user prompt into:
 
-- a detailed textual concept description
-- a visually aligned concept image
+- a descriptive hospitality concept using Google Gemini
+- a matching concept image using Hugging Face Stable Diffusion
 
-The project is designed for hospitality concept ideation, experience design visualization, and rapid presentation of venue ideas such as resorts, hotels, cafes, restaurants, and destination spaces.
+The enhanced version also includes:
+
+- user signup and login
+- SQLite-based design history
+- downloadable saved images
+- lightweight personal RAG using each user's previous saved concepts
 
 ## Overview
 
-In hospitality planning, a concept usually needs both narrative and visual communication. This project brings both together in one workflow. A user enters a prompt such as `Luxury beach resort with sunset view`, and the system generates:
+This project is designed for hospitality ideation and visualization use cases such as:
 
-- a descriptive concept summary using Google Gemini
-- a concept image using Hugging Face Stable Diffusion
+- luxury resorts
+- boutique hotels
+- destination retreats
+- premium cafes and restaurants
+- themed travel venues
 
-The result is shown in a clean Streamlit web interface, making the project suitable for academic presentation, architectural explanation, and future product extension.
+Users can generate new concepts, maintain their own saved design history, and use earlier preferences as contextual guidance for newer outputs.
 
 ## Key Features
 
-- Prompt-based concept generation
-- Text generation using Google Gemini
-- Image generation using Hugging Face Stable Diffusion
-- Simple and clean Streamlit UI
-- Side-by-side display of text and image outputs
-- Input validation and API error handling
-- Modular multi-file Python structure for maintainability
+- Prompt-based text and image generation
+- Gemini-powered hospitality concept descriptions
+- Hugging Face Stable Diffusion image generation
+- User account signup and login
+- SQLite database for user-specific generation history
+- Saved image download support
+- Personal RAG over previous saved concepts
+- Modular multi-file project structure
 
 ## Technology Stack
 
@@ -32,12 +41,13 @@ The result is shown in a clean Streamlit web interface, making the project suita
 - Streamlit
 - Google Gemini API via `google-genai`
 - Hugging Face Inference API
+- SQLite
 - `requests`
 
 ## Project Structure
 
 ```text
-team_handoff_demo/
+multimodal-hospitality-creator/
 |-- app/
 |   |-- __init__.py
 |   `-- main.py
@@ -57,88 +67,103 @@ team_handoff_demo/
 |-- docs/
 |   |-- HLD_REPORT_NOTES.md
 |   `-- PROJECT_OVERVIEW.md
+|-- storage/
+|   |-- app.db
+|   `-- images/
 |-- requirements.txt
 |-- .env.example
-|-- README.md
+|-- .gitignore
+`-- README.md
 ```
 
 ## Module Description
 
 ### `app/main.py`
 
-Main Streamlit application file.
+Main Streamlit application entrypoint.
 
-- renders the web interface
-- accepts user prompt input
-- triggers text and image generation
-- displays outputs in separate columns
-- handles user-facing errors
+- renders login and signup screens
+- manages session state
+- triggers generation workflow
+- displays current outputs
+- displays previous saved designs
+- supports image download
 
-### `gemini_service.py`
+### `services/gemini_service.py`
 
 Handles text generation using Google Gemini.
 
-- reads `GEMINI_API_KEY`
-- creates the Gemini client
-- sends the prompt to `gemini-2.5-flash`
-- returns generated text as a Python string
+- reads API key from environment variables or Streamlit secrets
+- accepts personal retrieval context
+- generates grounded hospitality concept descriptions
 
-### `image_service.py`
+### `services/image_service.py`
 
 Handles image generation using Hugging Face.
 
-- reads `HUGGINGFACE_API_KEY`
-- sends prompt to Stable Diffusion endpoint
-- returns image bytes for rendering in Streamlit
+- reads API key from environment variables or Streamlit secrets
+- calls Stable Diffusion inference endpoint
+- returns image bytes for display and storage
 
-### `config.py`
+### `database/db.py`
 
-Stores shared configuration values.
+Handles persistence and retrieval.
 
-- Gemini model name
-- Hugging Face model name
-- Hugging Face API endpoint
+- creates SQLite tables
+- stores user accounts
+- authenticates login
+- stores generations per user
+- retrieves user history
+- retrieves relevant history for personal RAG
 
-### `utils.py`
+### `config/config.py`
 
-Contains lightweight helper logic.
+Stores configuration values such as:
 
-- validates prompt input before API calls
+- model names
+- API endpoint
+- database path
+- local image storage path
+
+### `utils/utils.py`
+
+Contains helper utilities such as prompt validation.
 
 ## System Architecture
 
-The application follows a simple service-based architecture with clear separation of concerns.
+The application follows a modular service-based architecture with four main layers.
 
-### Architecture Layers
+### 1. Presentation Layer
 
-#### 1. Presentation Layer
+Implemented in Streamlit.
 
-Implemented using Streamlit in `app/main.py`.
+- login/signup UI
+- concept generation UI
+- user history UI
+- image download UI
 
-Responsibilities:
+### 2. Service Layer
 
-- accept user input
-- trigger the generation workflow
-- display text output
-- display image output
-- show spinner and error messages
+Implemented in Python service modules.
 
-#### 2. Application / Service Layer
+- Gemini text generation service
+- Hugging Face image generation service
 
-Implemented using Python service files.
+### 3. Persistence Layer
 
-Responsibilities:
+Implemented with SQLite and local file storage.
 
-- call Gemini API for text generation
-- call Hugging Face API for image generation
-- keep integration logic separate from UI logic
+- users stored in SQLite
+- generations stored in SQLite
+- generated images stored in `storage/images/`
 
-#### 3. External AI Services Layer
+### 4. Personal RAG Layer
 
-Third-party AI services used by the application.
+Implemented over user generation history.
 
-- Google Gemini for large language model based text generation
-- Hugging Face Stable Diffusion inference endpoint for image generation
+- retrieves similar previous prompts and descriptions
+- passes them as context to Gemini
+- improves continuity across a user's concepts
 
 ## Architecture Flow
 
@@ -148,122 +173,107 @@ User
   v
 Streamlit UI (app/main.py)
   |
-  +--> Gemini Service (gemini_service.py) --> Google Gemini API
+  +--> SQLite (database/db.py) --> Users / Saved Generations
   |
-  +--> Image Service (image_service.py) --> Hugging Face Stable Diffusion API
+  +--> Personal Retrieval --> Relevant User History
+  |
+  +--> Gemini Service --> Google Gemini API
+  |
+  +--> Image Service --> Hugging Face Stable Diffusion API
   |
   v
 Generated Text + Generated Image
   |
   v
-Rendered Back in Streamlit UI
+Saved to User History + Rendered in UI
 ```
 
 ## Process Flow
 
-1. User opens the Streamlit web application.
-2. User enters a hospitality concept prompt.
-3. User clicks the `Generate` button.
-4. The application validates the prompt.
-5. The prompt is sent to the Gemini service for text generation.
-6. Gemini returns a descriptive hospitality concept response.
-7. The same prompt is sent to the Hugging Face image service.
-8. Hugging Face returns the generated image.
-9. The application displays both outputs in the browser.
-10. If any failure occurs, the application shows an error message instead of breaking the UI.
+1. User signs up or logs in.
+2. User enters a hospitality prompt.
+3. The application validates the prompt.
+4. The database retrieves relevant previous saved generations for that user.
+5. The prompt and retrieved history are sent to Gemini.
+6. Gemini generates a text concept description.
+7. The same prompt is sent to Hugging Face for image generation.
+8. The generated image is saved locally.
+9. Prompt, generated text, and image path are stored in SQLite.
+10. The app displays the results in the UI.
+11. The user can view and download previous saved images from `My Designs`.
 
-## Information Flow
+## Personal RAG
 
-### Input
+This project includes a lightweight personal RAG mechanism.
 
-- user prompt entered in Streamlit
+Instead of retrieving from external documents, the system retrieves from:
 
-### Internal Processing
+- a user's previous prompts
+- a user's previous generated text outputs
 
-- validation through `utils/utils.py`
-- text request through `services/gemini_service.py`
-- image request through `services/image_service.py`
+This allows the app to:
 
-### Output
+- maintain stylistic continuity
+- reflect user preferences over time
+- produce more context-aware text generation
 
-- generated concept description
-- generated concept image
+The image generation flow remains unchanged and continues to use the current prompt directly.
 
 ## API Integration Details
 
 ### Google Gemini
 
 - SDK: `google-genai`
-- Import: `from google import genai`
 - Model: `gemini-2.5-flash`
-- Purpose: text generation
+- Purpose: hospitality text generation
 - Authentication: `GEMINI_API_KEY`
 
 ### Hugging Face Stable Diffusion
 
-- Access method: HTTP POST request
-- Endpoint: Hugging Face router inference endpoint
+- Access method: HTTP POST
 - Model: `stabilityai/stable-diffusion-xl-base-1.0`
 - Purpose: image generation
 - Authentication: `HUGGINGFACE_API_KEY`
 
-## Functional Workflow
+## Database Design
 
-### Text Generation
+### `users` table
 
-- receives prompt from UI
-- sends prompt to Gemini API
-- returns formatted descriptive text
+- `id`
+- `username`
+- `password_hash`
+- `created_at`
 
-### Image Generation
+### `generations` table
 
-- receives same prompt from UI
-- sends prompt to Hugging Face API
-- returns generated image bytes
-
-### User Presentation
-
-- outputs are displayed in two columns
-- text is shown under `Generated Text`
-- image is shown under `Generated Image`
+- `id`
+- `user_id`
+- `prompt`
+- `generated_text`
+- `image_path`
+- `created_at`
 
 ## Error Handling
 
-The project includes simple but useful error handling for a stable user experience.
+The application handles:
 
-- empty prompt validation
-- missing environment variables
+- empty prompt input
+- missing API keys
+- invalid login credentials
+- duplicate usernames
 - Gemini API errors
 - Hugging Face API errors
-- unexpected runtime errors
+- missing saved image files
 
-## Non-Functional Considerations
+## Security Notes
 
-### Maintainability
+- API keys are read from environment variables or Streamlit secrets
+- passwords are stored as SHA-256 hashes
+- secrets are not intended to be committed to source control
 
-- code is separated into focused modules
-- configuration is centralized
-- UI and API logic are kept separate
+## Local Run Instructions
 
-### Scalability
-
-The project currently focuses on core multimodal generation, but its structure allows future extension such as:
-
-- database integration
-- prompt history
-- user authentication
-- caching
-- deployment to cloud environments
-
-### Security
-
-- API keys are read from environment variables
-- secrets are not stored directly in source files
-- `.env.example` is included only as a reference template
-
-## Setup Instructions
-
-Open PowerShell in the project folder and run the following commands:
+Open PowerShell in the project folder and run:
 
 ```powershell
 python -m venv venv
@@ -280,15 +290,36 @@ Then open:
 http://127.0.0.1:8501
 ```
 
+## Streamlit Cloud Deployment
+
+This project can be deployed on Streamlit Community Cloud for project presentation use.
+
+### Deployment Steps
+
+1. Push the project to GitHub
+2. Go to `https://share.streamlit.io/`
+3. Sign in with GitHub
+4. Click `Create app`
+5. Choose your repository and branch
+6. Set the main file path to `app/main.py`
+7. Add secrets in `Advanced settings`
+
+```toml
+GEMINI_API_KEY="your_gemini_api_key"
+HUGGINGFACE_API_KEY="your_huggingface_api_key"
+```
+
+8. Click `Deploy`
+
+### Deployment Note
+
+SQLite and local file storage are suitable for short-term academic presentation use, but should not be treated as permanent production storage in hosted environments.
+
 ## Example Prompt
 
 ```text
 Luxury beach resort with sunset view
 ```
-
-## Current Scope
-
-The current version includes the complete multimodal generation pipeline with modular project structure, API integration, and interactive UI. The next enhancement phase can extend this foundation with persistence, analytics, and richer user workflows.
 
 ## References
 
