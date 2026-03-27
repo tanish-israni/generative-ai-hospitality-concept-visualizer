@@ -65,6 +65,7 @@ multimodal-hospitality-creator/
 |   |-- __init__.py
 |   `-- utils.py
 |-- docs/
+|   |-- HLD 2.O.pdf
 |   |-- HLD_REPORT_NOTES.md
 |   `-- PROJECT_OVERVIEW.md
 |-- storage/
@@ -294,6 +295,14 @@ http://127.0.0.1:8501
 
 This project can be deployed on Streamlit Community Cloud for project presentation use.
 
+## Live Deployment
+
+Deployed Streamlit App:
+
+[https://multimodal-hospitality-creator-qra6asgmpdcdswemau8z8j.streamlit.app/](https://multimodal-hospitality-creator-qra6asgmpdcdswemau8z8j.streamlit.app/)
+
+The deployed app runs on Streamlit Community Cloud, so it remains accessible even when the local development system is turned off. If the app has been inactive for some time, it may take a few seconds to wake up on first access.
+
 ### Deployment Steps
 
 1. Push the project to GitHub
@@ -327,3 +336,17 @@ Luxury beach resort with sunset view
 - Google Gemini Python SDK Documentation
 - Hugging Face Inference API Documentation
 - Python Requests Documentation
+
+## Team Contribution
+
+Tanish Israni: Led the overall technical design and end-to-end implementation of the project, including the Streamlit web app, Gemini and Hugging Face API integration, authentication flow, SQLite database, personal RAG using saved history, deployment setup, debugging, and final system integration.
+
+Samarth Patidar: Contributed to prompt analysis, output quality testing, API response validation, user-flow review, and testing of personal RAG behavior across different hospitality prompts.
+
+Yash Dashore: Worked on high-level system design, module-level architecture understanding, documentation of workflow and component interaction, database flow analysis, and preparation of presentation material and screenshots.
+
+Ramakant Singh: Contributed to functional testing of login, generation, and saved history features, verification of prompt validation and result rendering, organization of output samples, and documentation of testing outcomes and process flow.
+
+Abhishek Gupta: Assisted in documenting the project structure, module responsibilities, API interactions, database design, output consistency review, and preparation of technical content for the final report.
+
+Sourabh Patel: Supported analysis of feature flow and user interaction, documentation of authentication and retrieval logic, review of deployment readiness, and consolidation of technical documentation, screenshots, and submission material.
